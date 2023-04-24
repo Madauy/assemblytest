@@ -6,38 +6,37 @@ DATA:
     len 4
 
 CODE:
-    MOV B, arr      ; B = dirección base del arreglo
-    MOV A, (len)    ; A = longitud del arreglo
+    MOV B, arr
+    MOV A, (len)
 
 MIN_MAX_SORT:
     DEC A
     JEQ END_SORT
-    PUSH A          ; Guardar A en la pila (longitud actualizada)
-
-    MOV A, B        ; A = dirección base del arreglo
-    ADD A, len      ; A = dirección final del arreglo
-    DEC A           ; A -= 1 (último elemento)
-    PUSH A          ; Guardar A en la pila (dirección final)
+    PUSH A
+    MOV A, B
+    ADD A, len
+    DEC A
+    PUSH A
 
 MIN_LOOP:
-    MOV A, (B)      ; A = elemento en la dirección B
-    CMP A, (B+1)    ; Comparar A con el siguiente elemento
-    JGT MIN_SWAP    ; Si A > siguiente elemento, intercambiar los elementos
+    MOV A, (B)
+    CMP A, (B+1)
+    JGT MIN_SWAP
 
 NEXT_ELEMENT:
-    INC B           ; Incrementar la dirección en B
-    POP A           ; Recuperar la dirección final del arreglo de la pila
-    CMP A, B        ; Comparar la dirección en B con la dirección final
-    JNE MIN_LOOP    ; Si B != dirección final, continuar con el siguiente elemento
-    PUSH A          ; Guardar A en la pila (dirección final)
+    INC B
+    POP A
+    CMP A, B
+    JNE MIN_LOOP
+    PUSH A
 
-    POP A           ; Recuperar la longitud actualizada de la pila
+    POP A
     JMP MIN_MAX_SORT
 
 MIN_SWAP:
-    MOV A, (B+1)    ; A = siguiente elemento
-    MOV (B+1), (B)  ; Guardar elemento actual en la siguiente posición
-    MOV (B), A      ; Guardar A (siguiente elemento) en la posición actual
+    MOV A, (B+1)
+    MOV (B+1), (B)
+    MOV (B), A
     JMP NEXT_ELEMENT
 
 END_SORT:
