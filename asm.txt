@@ -45,7 +45,9 @@ MIN_SWAP:
     MOV A, (B)       ; A = elemento en la dirección B
     INC B            ; Incrementar la dirección en B
     MOV (B), A       ; Guardar A (elemento actual) en la siguiente posición
-    DEC B            ; Decrementar la dirección en B
+    INC B            ; Incrementar la dirección en B
+    SUB B, one       ; B -= 1
+    SUB B, one       ; B -= 1
     POP A            ; Recuperar A de la pila (elemento siguiente)
     MOV (B), A       ; Guardar A (elemento siguiente) en la posición actual
 
