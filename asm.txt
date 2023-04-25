@@ -1,50 +1,51 @@
 DATA:
-    arr 7
-        12
-        4
-        0
-    len 4
+  arr 7
+      12
+      4
+      0
+  len 4
+  one 1
 
 CODE:
-    MOV B, arr    ; B = dirección base del arreglo
-    MOV A, (len)  ; A = longitud del arreglo
+  MOV B, arr    ; B = dirección base del arreglo
+  MOV A, (len)  ; A = longitud del arreglo
 
 MIN_MAX_SORT:
-    DEC A
-    CMP A, 0
-    JLE END_SORT
-    PUSH A
+  CMP A, 0
+  JLE END_SORT
 
-    MOV A, B      ; A = dirección base del arreglo
-    PUSH A
+  PUSH A
+  PUSH B
 
-    ADD A, B
-    SUB A, 1
-    MOV B, A      ; B = dirección del último elemento del arreglo
+  MOV A, (B)    ; Guardar mínimo en A
+  MOV B, (B)    ; Guardar máximo en B
 
 MIN_LOOP:
-    CMP A, B
-    JGT SWAP
-    DEC B
-    JMP MIN_LOOP
+  INC (len)
+  CMP (len), A
+  JGE UPDATE_MIN
 
-SWAP:
-    MOV B, A
-    ADD A, 1
-    PUSH A
-    MOV A, (B)
-    ADD A, (B)
-    MOV B, A
-    POP A
-    SUB A, 1
-    MOV B, A
+  MOV A, (len)
+  JMP CONTINUE_MIN_LOOP
 
-    POP A
-    INC A
-    JMP MIN_LOOP
+UPDATE_MIN:
+  CMP (len), B
+  JLE CONTINUE_MIN_LOOP
+
+  MOV B, (len)
+
+CONTINUE_MIN_LOOP:
+  ADD (len), (one)
+  CMP (len), (arr)
+  JNE MIN_LOOP
+
+  MOV (arr), A
+  MOV (len), B
+
+  POP B
+  POP A
+  SUB A, (one)
+  JMP MIN_MAX_SORT
 
 END_SORT:
-    POP A
-    INC A
-    MOV B, A
-    JMP MIN_MAX_SORT
+
