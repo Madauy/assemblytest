@@ -4,72 +4,83 @@ DATA:
       4
       0
   len 4
+  idx 0
+  idx_end 3
+  min_idx 0
+  max_idx 0
+  temp 0
+  one 1
 
 CODE:
-  MOV B, len
-  SHR B
   MOV A, arr
-  MOV (Dir), A
   CALL min_max_sort
   JMP end
 
 min_max_sort:
-  PUSH B
-  MOV B, (Dir)
-  ADD B, A
-  JLE done
-  MOV B, A
-  CALL find_min_max
+  PUSH A
+  MOV B, len
   MOV A, (B)
-  MOV (Dir), A
+  JLE done
+  MOV A, idx
+  CALL find_min_max
   CALL swap_min_max
-  INC A
-  INC Dir
-  DEC len
-  DEC len
+  INC (idx)
+  MOV A, idx_end
+  SUB A, (one)
+  MOV (idx_end), A
+  MOV A, (B)
+  SUB A, (one)
+  MOV (B), A
   JMP min_max_sort
 
 done:
-  POP B
+  POP A
   RET
 
 find_min_max:
-  PUSH A
-  PUSH B
-  MOV A, (B)
-  INC B
-  MOV (B), A
-  INC B
-  MOV A, (B)
-  INC B
-  MOV (B), A
-  INC B
-  JMP min_max_search_loop
+  MOV A, idx
+  MOV min_idx, A
+  MOV A, idx_end
+  MOV max_idx, A
+  MOV A, idx
+  ADD A, (one)
+  MOV B, A
 
-min_max_search_loop:
-  CPM A, (Dir)
-  JGE min_max_search_next
-  MOV A, (Dir)
-  MOV B, (B)
-  JMP min_max_search_loop
+find_loop:
+  CPM A, (idx_end)
+  JGT find_done
+  MOV A, (B)
+  CPM A, (min_idx)
+  JLT update_min
+  JMP skip_min
 
-min_max_search_next:
-  DEC B
-  CPM B, A
-  JNE min_max_search_loop
-  POP B
-  POP A
+update_min:
+  MOV (min_idx), B
+
+skip_min:
+  MOV A, (B)
+  CPM A, (max_idx)
+  JGT update_max
+  JMP skip_max
+
+update_max:
+  MOV (max_idx), B
+
+skip_max:
+  ADD A, (one)
+  ADD B, (one)
+  JMP find_loop
+
+find_done:
   RET
 
 swap_min_max:
-  PUSH A
-  PUSH B
-  MOV A, (Dir)
-  MOV B, (B)
-  MOV (Dir), B
-  MOV (B), A
-  POP B
-  POP A
+  MOV A, (min_idx)
+  MOV (temp), A
+  MOV A, (max_idx)
+  MOV (min_idx), A
+  MOV A, temp
+  MOV (max_idx), A
   RET
 
 end:
