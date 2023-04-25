@@ -29,57 +29,49 @@ MIN_MAX_SORT:
 
 MIN_LOOP:
   MOV A, (temp)
-  ADD A, (one)
+  SUB A, (one)
   MOV (temp), A
-  CMP A, (arr)
-  JNE CONTINUE_MIN_LOOP
+  CMP A, 0
+  JLE END_MIN_LOOP
 
-  JMP END_MIN_LOOP
-
-CONTINUE_MIN_LOOP:
-  CMP A, (arr)
+  ; Comparar y actualizar mínimo
+  MOV A, (B)
+  CMP A, (min_pos)
   JGE UPDATE_MIN
-
-  MOV (max_pos), A
-  MOV A, (arr)
-
   JMP NEXT_ITERATION_MIN_LOOP
 
 UPDATE_MIN:
-  CMP A, (arr)
-  JLE NEXT_ITERATION_MIN_LOOP
-
-  MOV (min_pos), A
-  MOV B, (arr)
+  MOV (min_pos), B
+  JMP NEXT_ITERATION_MIN_LOOP
 
 NEXT_ITERATION_MIN_LOOP:
-  ADD A, (one)
-  MOV (temp), A
+  INC B
   JMP MIN_LOOP
 
 END_MIN_LOOP:
   ; Swap min and first element
   MOV A, (arr)
   MOV B, (min_pos)
-  MOV (min_pos), A
-  MOV (arr), B
+  MOV (temp), A
+  MOV A, (B)
+  MOV (min_pos), (temp)
+  MOV (arr), A
 
   ; Swap max and last element
   MOV B, (max_pos)
   MOV A, (len)
+  SUB A, (one)
   ADD A, (arr)
+  MOV (temp), A
   MOV A, (B)
-  MOV B, (arr)
-  MOV (arr), A
-  MOV (max_pos), B
+  MOV (max_pos), (temp)
+  MOV (temp), A
 
   POP B
   POP A
   SUB A, (one)
   MOV (len), A
-  MOV A, (one)
-  ADD A, (B)
-  MOV B, A
+  INC B
   JMP MIN_MAX_SORT
 
 END_SORT:
