@@ -4,76 +4,72 @@ DATA:
       4
       0
   len 4
-  one 1
-  temp 0
-  min_pos 0
-  max_pos 0
 
 CODE:
-  MOV B, arr    ; B = dirección base del arreglo
-  MOV A, (len)  ; A = longitud del arreglo
+  MOV B, len
+  SHR B
+  MOV A, arr
+  MOV (Dir), A
+  CALL min_max_sort
+  JMP end
 
-MIN_MAX_SORT:
-  CMP A, 0
-  JLE END_SORT
+min_max_sort:
+  PUSH B
+  MOV B, (Dir)
+  ADD B, A
+  JLE done
+  MOV B, A
+  CALL find_min_max
+  MOV A, (B)
+  MOV (Dir), A
+  CALL swap_min_max
+  INC A
+  INC Dir
+  DEC len
+  DEC len
+  JMP min_max_sort
 
+done:
+  POP B
+  RET
+
+find_min_max:
   PUSH A
   PUSH B
-
-  MOV A, (B)    ; Guardar mínimo en A
-  MOV (min_pos), B
-  MOV B, (B)    ; Guardar máximo en B
-  MOV (max_pos), B
-  MOV A, (len)  ; Preparar el contador del bucle
-  MOV (temp), A
-
-MIN_LOOP:
-  MOV A, (temp)
-  SUB A, (one)
-  MOV (temp), A
-  CMP A, 0
-  JLE END_MIN_LOOP
-
-  ; Comparar y actualizar mínimo
   MOV A, (B)
-  CMP A, (min_pos)
-  JGE UPDATE_MIN
-  JMP NEXT_ITERATION_MIN_LOOP
-
-UPDATE_MIN:
-  MOV (min_pos), B
-  JMP NEXT_ITERATION_MIN_LOOP
-
-NEXT_ITERATION_MIN_LOOP:
   INC B
-  JMP MIN_LOOP
-
-END_MIN_LOOP:
-  ; Swap min and first element
-  MOV A, (arr)
-  MOV B, (min_pos)
-  MOV (temp), A
+  MOV (B), A
+  INC B
   MOV A, (B)
-  MOV B, (temp)
-  MOV (min_pos), A
-  MOV (arr), B
+  INC B
+  MOV (B), A
+  INC B
+  JMP min_max_search_loop
 
-  ; Swap max and last element
-  MOV B, (max_pos)
-  MOV A, (len)
-  SUB A, (one)
-  ADD A, (arr)
-  MOV (temp), A
-  MOV A, (B)
-  MOV B, (temp)
-  MOV (max_pos), A
-  MOV (temp), B
+min_max_search_loop:
+  CPM A, (Dir)
+  JGE min_max_search_next
+  MOV A, (Dir)
+  MOV B, (B)
+  JMP min_max_search_loop
 
+min_max_search_next:
+  DEC B
+  CPM B, A
+  JNE min_max_search_loop
   POP B
   POP A
-  SUB A, (one)
-  MOV (len), A
-  INC B
-  JMP MIN_MAX_SORT
+  RET
 
-END_SORT:
+swap_min_max:
+  PUSH A
+  PUSH B
+  MOV A, (Dir)
+  MOV B, (B)
+  MOV (Dir), B
+  MOV (B), A
+  POP B
+  POP A
+  RET
+
+end:
