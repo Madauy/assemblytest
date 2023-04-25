@@ -54,8 +54,9 @@ END_MIN_LOOP:
   MOV B, (min_pos)
   MOV (temp), A
   MOV A, (B)
-  MOV (min_pos), (temp)
-  MOV (arr), A
+  MOV B, (temp)
+  MOV (min_pos), A
+  MOV (arr), B
 
   ; Swap max and last element
   MOV B, (max_pos)
@@ -64,8 +65,9 @@ END_MIN_LOOP:
   ADD A, (arr)
   MOV (temp), A
   MOV A, (B)
-  MOV (max_pos), (temp)
-  MOV (temp), A
+  MOV B, (temp)
+  MOV (max_pos), A
+  MOV (temp), B
 
   POP B
   POP A
