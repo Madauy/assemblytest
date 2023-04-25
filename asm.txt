@@ -4,62 +4,47 @@ DATA:
         4
         0
     len 4
-    one 1
-    zero 0
 
 CODE:
-    MOV B, arr       ; B = dirección base del arreglo
-    MOV A, len       ; A = longitud del arreglo
+    MOV B, arr    ; B = dirección base del arreglo
+    MOV A, (len)  ; A = longitud del arreglo
 
 MIN_MAX_SORT:
-    SUB A, one       ; A -= 1
+    DEC A
+    CMP A, 0
     JLE END_SORT
-    PUSH A           ; Guardar A en la pila (longitud actualizada)
+    PUSH A
 
-    MOV A, B         ; A = dirección base del arreglo
-    ADD A, len       ; A = dirección final del arreglo
-    SUB A, one       ; A -= 1 (último elemento)
-    PUSH A           ; Guardar A en la pila (dirección final)
+    MOV A, B      ; A = dirección base del arreglo
+    PUSH A
+
+    ADD A, B
+    SUB A, 1
+    MOV B, A      ; B = dirección del último elemento del arreglo
 
 MIN_LOOP:
-    PUSH B           ; Guardar B en la pila
-    INC B            ; Incrementar la dirección en B
-    MOV A, (B)       ; A = elemento en la dirección B
-    POP B            ; Recuperar B de la pila
-    CMP A, (B)       ; Comparar A con el elemento en la dirección B
-    JGT MIN_SWAP     ; Si A > elemento en la dirección B, intercambiar los elementos
+    CMP A, B
+    JGT SWAP
+    DEC B
+    JMP MIN_LOOP
 
-NEXT_ELEMENT:
-    INC B            ; Incrementar la dirección en B
-    POP A            ; Recuperar la dirección final del arreglo de la pila
-    CMP A, B         ; Comparar la dirección en B con la dirección final
-    JNE MIN_LOOP     ; Si B != dirección final, continuar con el siguiente elemento
-    JMP UPDATE_STATE ; Ir a la actualización del estado
+SWAP:
+    MOV B, A
+    ADD A, 1
+    PUSH A
+    MOV A, (B)
+    ADD A, (B)
+    MOV B, A
+    POP A
+    SUB A, 1
+    MOV B, A
 
-MIN_SWAP:
-    PUSH B           ; Guardar B en la pila
-    INC B            ; Incrementar la dirección en B
-    MOV A, (B)       ; A = elemento en la dirección B
-    POP B            ; Recuperar B de la pila
-    PUSH A           ; Guardar A en la pila (elemento siguiente)
-    MOV A, (B)       ; A = elemento en la dirección B
-    INC B            ; Incrementar la dirección en B
-    MOV (B), A       ; Guardar A (elemento actual) en la siguiente posición
-    INC B            ; Incrementar la dirección en B
-    SUB B, one       ; B -= 1
-    SUB B, one       ; B -= 1
-    POP A            ; Recuperar A de la pila (elemento siguiente)
-    MOV (B), A       ; Guardar A (elemento siguiente) en la posición actual
-
-UPDATE_STATE:
-    POP A            ; Recuperar la dirección final del arreglo de la pila
-    SUB A, one       ; A -= 1 (actualizar la dirección final)
-    PUSH A           ; Guardar A en la pila (dirección final actualizada)
-    INC B            ; Incrementar la dirección en B (actualizar la dirección base)
-    MOV A, zero      ; A = 0 (usado para comparar con la longitud actualizada)
-    CMP A, B         ; Comparar la dirección base con 0
-    JNE NEXT_ELEMENT ; Si la dirección base != 0, continuar con el siguiente elemento
-    POP A            ; Recuperar la longitud actualizada de la pila
-    JMP MIN_MAX_SORT ; Continuar con el siguiente paso del algoritmo min-max sort
+    POP A
+    INC A
+    JMP MIN_LOOP
 
 END_SORT:
+    POP A
+    INC A
+    MOV B, A
+    JMP MIN_MAX_SORT
