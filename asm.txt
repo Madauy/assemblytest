@@ -1,86 +1,157 @@
 DATA:
-  arr 7
-      12
-      4
-      0
-  len 4
-  idx 0
-  idx_end 3
+  arr   7
+        12
+        4
+        0
+  len   4
+  i     0
+  j     0
+  min   0
+  max   0
   min_idx 0
   max_idx 0
-  temp 0
-  one 1
+  tmp   0
+  one   1
 
 CODE:
-  MOV A, arr
-  CALL min_max_sort
-  JMP end
+  ; Initialize i
+  MOV B, i
+  MOV A, (B)
+  ADD A, one
+  MOV (B), A
 
-min_max_sort:
-  PUSH A
+_start_outer_loop:
+  ; Reset min and max values
+  MOV B, arr
+  ADD A, i
+  MOV B, A
+  MOV A, (B)
+  MOV B, min
+  MOV (B), A
+  MOV B, max
+  MOV (B), A
+
+  ; Initialize j and index values
+  MOV B, i
+  MOV A, (B)
+  ADD A, one
+  MOV B, j
+  MOV (B), A
+  MOV B, min_idx
+  MOV (B), A
+  MOV B, max_idx
+  MOV (B), A
+
+_start_inner_loop:
+  ; Compare with min
+  MOV B, arr
+  ADD A, j
+  MOV B, A
+  MOV A, (B)
+  MOV B, min
+  CPM A, (B)
+  JLT _update_min
+  JMP _compare_with_max
+
+_update_min:
+  MOV B, min
+  MOV (B), A
+  MOV B, min_idx
+  MOV (B), j
+
+_compare_with_max:
+  MOV B, arr
+  ADD A, j
+  MOV B, A
+  MOV A, (B)
+  MOV B, max
+  CPM A, (B)
+  JGT _update_max
+  JMP _increment_j
+
+_update_max:
+  MOV B, max
+  MOV (B), A
+  MOV B, max_idx
+  MOV (B), j
+
+_increment_j:
+  ; Increment j
+  MOV B, j
+  MOV A, (B)
+  ADD A, one
+  MOV (B), A
+
+  ; Check if j < len - i - 1
   MOV B, len
   MOV A, (B)
-  JLE done
-  MOV A, idx
-  CALL find_min_max
-  CALL swap_min_max
-  INC (idx)
-  MOV A, idx_end
-  SUB A, (one)
-  MOV (idx_end), A
-  MOV A, (B)
-  SUB A, (one)
-  MOV (B), A
-  JMP min_max_sort
+  SUB A, i
+  SUB A, one
+  CPM A, j
+  JLT _start_inner_loop
 
-done:
-  POP A
-  RET
-
-find_min_max:
-  MOV A, idx
-  MOV min_idx, A
-  MOV A, idx_end
-  MOV max_idx, A
-  MOV A, idx
-  ADD A, (one)
+  ; Swap min value
+  MOV B, arr
+  ADD A, i
   MOV B, A
-
-find_loop:
-  CPM A, (idx_end)
-  JGT find_done
   MOV A, (B)
-  CPM A, (min_idx)
-  JLT update_min
-  JMP skip_min
-
-update_min:
-  MOV (min_idx), B
-
-skip_min:
+  MOV B, tmp
+  MOV (B), A
+  MOV B, arr
+  ADD A, min_idx
+  MOV B, A
   MOV A, (B)
-  CPM A, (max_idx)
-  JGT update_max
-  JMP skip_max
+  MOV B, arr
+  ADD A, i
+  MOV B, A
+  MOV (B), A
+  MOV B, arr
+  ADD A, min_idx
+  MOV B, A
+  MOV B, tmp
+  MOV A, (B)
+  MOV (B), A
 
-update_max:
-  MOV (max_idx), B
+  ; Swap max value
+  MOV B, arr
+  MOV A, len
+  SUB A, one
+  SUB A, i
+  ADD A, arr
+  MOV B, A
+  MOV A, (B)
+  MOV B, tmp
+  MOV (B), A
+  MOV B, arr
+  ADD A, max_idx
+  MOV B, A
+  MOV A, (B)
+  MOV B, arr
+  MOV A, len
+   SUB A, one
+  SUB A, i
+  ADD A, arr
+  MOV B, A
+  MOV (B), A
+  MOV B, arr
+  ADD A, max_idx
+  MOV B, A
+  MOV B, tmp
+  MOV A, (B)
+  MOV (B), A
 
-skip_max:
-  ADD A, (one)
-  ADD B, (one)
-  JMP find_loop
+  ; Increment i
+  MOV B, i
+  MOV A, (B)
+  ADD A, one
+  MOV (B), A
 
-find_done:
-  RET
+  ; Check if i < len / 2
+  MOV B, len
+  MOV A, (B)
+  SHR (B)
+  MOV A, (B)
+  CPM A, i
+  JLT _start_outer_loop
 
-swap_min_max:
-  MOV A, (min_idx)
-  MOV (temp), A
-  MOV A, (max_idx)
-  MOV (min_idx), A
-  MOV A, temp
-  MOV (max_idx), A
-  RET
-
-end:
+; End
